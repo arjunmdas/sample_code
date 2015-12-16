@@ -7,12 +7,12 @@ class Polynomial
         inputs.each do |input|
             if (input!=0) && (!input.is_a? String)
                 #str += (input.abs!=1 ? input>0 ? (exponent < inputs.length-1 ? "+#{input}":"#{input}") :"#{input}" : input>0 ? "":"-") + (exponent!=0 ? "x" : "") + (exponent>1 ? "^#{exponent}" : (0 == exponent) && (1==input.abs)? "1" : "")
-                str1 += exponent < inputs.length-1 && input > 0 ? "+": "" #Requires "+" or not
-                str1 += input.abs!=1 ? "#{input}": input < 0 ? "-" : ""   #coefficient 
-                str1 += exponent!=0 ? "x" : ""                            #x - print if not 0   
-                str1 += exponent>1 ? "^#{exponent}" : (0 == exponent) && (1==input.abs)? "1" : "" #print exponent value
+                str1 += exponent < inputs.length-1 && input > 0 ? "+": "" # Requires "+" if not first element and  if +ve.
+                str1 += input.abs!=1 ? "#{input}": input < 0 ? "-" : ""   # coefficient of the polynomial if not 1, if "-1",add - 
+                str1 += exponent !=0 ? "x" : ""                           # x - print "x" if exponent if not 0
+                str1 += exponent > 1 ? "^#{exponent}" : (0 == exponent) && (1 == input.abs) ? "1" : "" # print exponent value if not 1 - also handle conrner case for 1*x^0
             elsif input.is_a?(String)
-                raise ArgumentError, "Accepts only integers"                
+                raise ArgumentError, "Accepts only Numbers"                
             end
             exponent-=1 
         end
