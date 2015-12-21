@@ -53,7 +53,7 @@ Y_OFFSET = 200
     attr_accessor :front
 
     def initialize(size)
-      @image = Gosu::Image.new("starfighter.bmp")
+      @image = Gosu::Image.new("media/starfighter.bmp")
       @x = 0
       @y = 0
       @x_temp = 0
@@ -171,11 +171,14 @@ Y_OFFSET = 200
       @by_pos = 0
       @starship = Starship.new(@block_size)
       @start = false
+
+      @bgm=Gosu::Sample.new("media/bgm.mp3")
     end
 
   def update
     if Gosu::button_down? Gosu::KbS
       @start = true
+      @bgm.play
     end
 
     if Gosu::button_down? Gosu::KbQ
@@ -257,6 +260,7 @@ Y_OFFSET = 200
     elsif(true == @start)
       @starship.x = @bx_pos
       @starship.y = @by_pos  
+      @bgm.stop
     end
   end  
  
