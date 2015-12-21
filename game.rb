@@ -172,7 +172,7 @@ Y_OFFSET = 200
       @starship = Starship.new(@block_size)
       @start = false
 
-      @bgm=Gosu::Sample.new("media/bgm.mp3")
+      @bgm=Gosu::Song.new("media/bgm.mp3")
     end
 
   def update
@@ -188,6 +188,7 @@ Y_OFFSET = 200
       @by_pos = 0
       @start = false
       @draw_first_time = true
+      @bgm.stop
     elsif Gosu::button_down? Gosu::KbW
       @str = MAZE2
       @rows = MAZE2.split("\n")
@@ -195,6 +196,7 @@ Y_OFFSET = 200
       @by_pos = 0
       @start = false      
       @draw_first_time = true
+      @bgm.stop
     elsif Gosu::button_down? Gosu::KbE     
       @str = MAZE3
       @rows = MAZE3.split("\n")
@@ -202,6 +204,7 @@ Y_OFFSET = 200
       @by_pos = 0
       @start = false    
       @draw_first_time = true
+      @bgm.stop
     end
 
     if (@starship.x.ceil != @bx_pos || @starship.y.ceil != @by_pos) && @start == true
