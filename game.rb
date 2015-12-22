@@ -47,10 +47,11 @@ X_OFFSET = 50
 Y_OFFSET = 200
 
   class Starship
+    
     attr_accessor :x
     attr_accessor :y
     attr_accessor :size
-    attr_accessor :front
+      attr_reader :front
 
     def initialize(size)
       @image = Gosu::Image.new("media/starfighter.bmp")
@@ -62,8 +63,8 @@ Y_OFFSET = 200
       @size = size
       @front = "-y"  
       @update_count=0    
-
     end
+
     def reverse
       @angle+=180
       if @front == "x"
@@ -109,7 +110,6 @@ Y_OFFSET = 200
         @front = "x"
         @x += 1
       end
-
     end
 
     def go_forward
@@ -161,164 +161,144 @@ Y_OFFSET = 200
 
       #maze
       @str = MAZE1
-      @rows = MAZE1.split("\n")
-      @draw_first_time = true
-      #@message = Gosu::Image.from_text(
-        #self, @rows, Gosu.default_font_name, 30)
-      
+      @rows = @str.split("\n")
+      @draw_first_time = true      
       @block_size = 30
       @bx_pos = 0
       @by_pos = 0
       @starship = Starship.new(@block_size)
       @start = false
-
       @bgm=Gosu::Song.new("media/bgm.mp3")
     end
 
-  def update
-    if Gosu::button_down? Gosu::KbS
-      @start = true
-      @bgm.play
+    def update
+      if Gosu::button_down? Gosu::KbS
+        @start = true
+        @bgm.play
+      end
+
+      if Gosu::button_down? Gosu::KbQ
+        @str = MAZE1
+        init
+      elsif Gosu::button_down? Gosu::KbW
+        @str = MAZE2
+        init
+      elsif Gosu::button_down? Gosu::KbE     
+        @str = MAZE3
+        init
+      end
+
+      if (@starship.x != @bx_pos || @starship.y != @by_pos) && @start == true
+        if @starship.front == "x" 
+          if @rows[@starship.y+1].split("")[@starship.x] != "#"
+            @starship.turn_right
+          elsif @rows[@starship.y].split("")[@starship.x+1] != "#"
+            @starship.go_forward            
+          elsif @rows[@starship.y-1].split("")[@starship.x] != "#"
+            @starship.turn_left
+          else
+            @starship.reverse
+          end
+        elsif @starship.front == "-y" 
+          if @rows[@starship.y].split("")[@starship.x+1] != "#"
+            @starship.turn_right
+          elsif @rows[@starship.y-1].split("")[@starship.x] != "#"
+            @starship.go_forward
+          elsif @rows[@starship.y].split("")[@starship.x-1] != "#"
+            @starship.turn_left
+          else
+            @starship.reverse
+          end
+        elsif @starship.front == "-x"         
+          if @rows[@starship.y-1].split("")[@starship.x] != "#"
+            @starship.turn_right 
+          elsif @rows[@starship.y].split("")[@starship.x-1] != "#"
+            @starship.go_forward           
+          elsif @rows[@starship.y+1].split("")[@starship.x] != "#"
+            @starship.turn_left
+          else
+            @starship.reverse
+          end
+        elsif @starship.front == "y" 
+          if @rows[@starship.y].split("")[@starship.x-1] != "#"
+            @starship.turn_right 
+          elsif @rows[@starship.y+1].split("")[@starship.x] != "#"
+            @starship.go_forward           
+          elsif @rows[@starship.y].split("")[@starship.x+1] != "#"
+            @starship.turn_left
+          else
+            @starship.reverse
+          end
+        end
+      elsif(true == @start)
+        @starship.x = @bx_pos
+        @starship.y = @by_pos  
+        @bgm.stop
+      end
+    end  
+   
+    def draw
+      x = 0
+      y = 0  
+      @rows.each do |row|
+        row.split("").each do |blockade|
+          if blockade == '#'
+            draw_block(x,y)
+          elsif blockade == 'A' 
+            if @draw_first_time == true
+              draw_empty(x,y)
+              @starship.x = x
+              @starship.y = y
+              @starship.draw
+              @draw_first_time = false
+            else
+              draw_empty(x,y)
+              @starship.draw
+            end 
+          elsif blockade == 'B'
+            draw_empty(x,y)
+            draw_target(x,y)
+            @bx_pos = x
+            @by_pos = y
+          else  
+            draw_empty(x,y)
+          end
+          x += 1
+        end
+        x  = 0
+        y += 1
+      end
     end
 
-    if Gosu::button_down? Gosu::KbQ
-      @str = MAZE1
-      @rows = MAZE1.split("\n")
+    private 
+
+    def init
+      @rows = @str.split("\n")
       @bx_pos = 0
       @by_pos = 0
       @start = false
       @draw_first_time = true
       @bgm.stop
-    elsif Gosu::button_down? Gosu::KbW
-      @str = MAZE2
-      @rows = MAZE2.split("\n")
-      @bx_pos = 0
-      @by_pos = 0
-      @start = false      
-      @draw_first_time = true
-      @bgm.stop
-    elsif Gosu::button_down? Gosu::KbE     
-      @str = MAZE3
-      @rows = MAZE3.split("\n")
-      @bx_pos = 0
-      @by_pos = 0
-      @start = false    
-      @draw_first_time = true
-      @bgm.stop
     end
 
-    if (@starship.x.ceil != @bx_pos || @starship.y.ceil != @by_pos) && @start == true
-      if @starship.front == "x" 
-        if @rows[@starship.y+1].split("")[@starship.x] != "#"
-          @starship.turn_right
-          #@starship.go_forward  
-        elsif @rows[@starship.y].split("")[@starship.x+1] != "#"
-          @starship.go_forward            
-        elsif @rows[@starship.y-1].split("")[@starship.x] != "#"
-          @starship.turn_left
-          #@starship.go_forward  
-        else
-          @starship.reverse
-        end
-      elsif @starship.front == "-y" 
-        if @rows[@starship.y].split("")[@starship.x+1] != "#"
-          @starship.turn_right
-          #@starship.go_forward  
-        elsif @rows[@starship.y-1].split("")[@starship.x] != "#"
-          @starship.go_forward
-        elsif @rows[@starship.y].split("")[@starship.x-1] != "#"
-          @starship.turn_left
-          #@starship.go_forward  
-
-        else
-          @starship.reverse
-        end
-      elsif @starship.front == "-x"         
-        if @rows[@starship.y-1].split("")[@starship.x] != "#"
-          @starship.turn_right
-          #@starship.go_forward 
-        elsif @rows[@starship.y].split("")[@starship.x-1] != "#"
-          @starship.go_forward           
-        elsif @rows[@starship.y+1].split("")[@starship.x] != "#"
-          @starship.turn_left
-          #@starship.go_forward  
-
-        else
-          @starship.reverse
-        end
-      elsif @starship.front == "y" 
-        if @rows[@starship.y].split("")[@starship.x-1] != "#"
-          @starship.turn_right
-          #@starship.go_forward  
-        elsif @rows[@starship.y+1].split("")[@starship.x] != "#"
-          @starship.go_forward           
-        elsif @rows[@starship.y].split("")[@starship.x+1] != "#"
-          @starship.turn_left
-          #@starship.go_forward  
- 
-        else
-          @starship.reverse
-        end
-      end
-    elsif(true == @start)
-      @starship.x = @bx_pos
-      @starship.y = @by_pos  
-      @bgm.stop
+    def draw_block(x,y)
+      x = x*@block_size + X_OFFSET
+      y = y*@block_size + Y_OFFSET
+      draw_quad(x, y, @color_brick, x+@block_size, y, @color_brick, x, y+@block_size, @color_brick, x+@block_size, y+@block_size, @color_brick, -1)
     end
-  end  
- 
-  def draw
-    x = 0
-    y = 0  
-    @rows.each do |row|
-      row.split("").each do |blockade|
-        if blockade == '#'
-          draw_block(x,y)
-        elsif blockade == 'A' 
-          if @draw_first_time == true
-            draw_empty(x,y)
-            @starship.x = x
-            @starship.y = y
-            @starship.draw
-            @draw_first_time = false
-          else
-            draw_empty(x,y)
-            @starship.draw
-          end 
-        elsif blockade == 'B'
-          draw_empty(x,y)
-          draw_target(x,y)
-          @bx_pos = x
-          @by_pos = y
-        else  
-          draw_empty(x,y)
-        end
-        x += 1
-      end
-      x  = 0
-      y += 1
+
+    def draw_empty(x,y)
+      x = x*@block_size + X_OFFSET
+      y = y*@block_size + Y_OFFSET
+      draw_quad(x, y, @color_empty, x+@block_size, y, @color_empty, x, y+@block_size, @color_empty, x+@block_size, y+@block_size, @color_empty, -1)
+    end
+
+    def draw_target(x,y)
+      x = x*@block_size + X_OFFSET
+      y = y*@block_size + Y_OFFSET
+      draw_triangle(x, y+@block_size,  @color_B, x+@block_size, y+@block_size, @color_B, x+@block_size/2, y, @color_B, -1)
     end
   end
-
-  private 
-  def draw_block(x,y)
-    x = x*@block_size + X_OFFSET
-    y = y*@block_size + Y_OFFSET
-    draw_quad(x, y, @color_brick, x+@block_size, y, @color_brick, x, y+@block_size, @color_brick, x+@block_size, y+@block_size, @color_brick, -1)
-  end
-
-  def draw_empty(x,y)
-    x = x*@block_size + X_OFFSET
-    y = y*@block_size + Y_OFFSET
-    draw_quad(x, y, @color_empty, x+@block_size, y, @color_empty, x, y+@block_size, @color_empty, x+@block_size, y+@block_size, @color_empty, -1)
-  end
-
-  def draw_target(x,y)
-    x = x*@block_size + X_OFFSET
-    y = y*@block_size + Y_OFFSET
-    draw_triangle(x, y+@block_size,  @color_B, x+@block_size, y+@block_size, @color_B, x+@block_size/2, y, @color_B, -1)
-  end
-
- end
+  
  window = GameWindow.new
  window.show
